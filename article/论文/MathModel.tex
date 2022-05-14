@@ -83,11 +83,11 @@
 \begin{tabular}{cc}
  \hline
  \makebox[0.4\textwidth][c]{符号}	&  \makebox[0.5\textwidth][c]{意义} \\ \hline
+    $\lambda_a$	    & 宽度（cm） \\ \hline
     $\beta$	    & 宽度（cm） \\ \hline
-    $\beta$	    & 宽度（cm） \\ \hline
-    $\beta$	    & 宽度（cm） \\ \hline
-    $\beta$	    & 宽度（cm） \\ \hline
-    $\beta$	    & 宽度（cm） \\ \hline
+    $\phi$	    & 宽度（cm） \\ \hline
+    $r_a$	    & 宽度（cm） \\ \hline
+    $M$	    & 宽度（cm） \\ \hline
     $\beta$	    & 宽度（cm） \\ \hline
     $\beta$	    & 宽度（cm） \\ \hline
     $\beta$	    & 宽度（cm） \\ \hline
@@ -96,17 +96,35 @@
 \section{问题一的分析与求解}
 假设在疫情爆发初期，上海市政府采取美国的防疫策略，请建立数学模型预测本次疫情在两个月内的发展趋势和累计病例数
 \subsection{问题分析}
+分为随机（Stochastic）模型和决定性（Deterministic）模型
 \subsection{隔间模型}
 隔间模型是一种疾病传播模型，把人群分为
 \subsection{参数辨识}
 优化算法，拟合得到参数
+\subsection{数据收集与预处理}
+\begin{equation}
+\frac{dS}{dt}=-\frac{\beta SI}{N}\\
+\end{equation}
+\begin{equation}
+\frac{dI}{dt}=\frac{\beta SI}{N}-\frac{I}{D}\\
+\end{equation}
+\begin{equation}
+\frac{dR}{dt}=\frac{I}{D}
+\end{equation}
 \subsection{小结}
 
 
 \section{问题二的分析与求解}
 请根据上海市政府初期的精准防控策略和对应的公布数据，建立数学模型估计在该防控策略下的再生数。进一步，如果上海市政府一直执行初期精准防控的策略，请根据模型预测本次疫情在两个月内的发展趋势和累计病例数
 \subsection{问题分析}
+SEIR模型
+机器学习方法，时间序列方法
+缺乏可解释性
 \subsection{再生数}
+\subsection{SLIRS模型}
+SLIRS模型，将人群分成了
+\par 采用随机模型，符合二项分布。对每一个个体，其
+\subsection{考虑大规模疫苗接种的模型}
 
 
 \section{问题三的分析与求解}
