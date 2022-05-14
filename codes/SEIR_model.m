@@ -7,11 +7,11 @@ S(1)=S0;
 E(1)=E0;
 I(1)=I0;
 R(1)=R0;
-for i = 1:t
-    S(i+1) = S(i) - r*B*S(i)*I(i)/N0;
-    E(i+1) = E(i) + r*B*S(i)*I(i)/N0-a*E(i);
-    I(i+1) = I(i) + a*E(i) - y*I(i);
-    R(i+1) = R(i) + y*I(i);
-end
+    for i = 1:t
+        S(i+1) = S(i) - r*B*S(i)*I(i)/N0;
+        E(i+1) = E(i) + r*B*S(i)*I(i)/N0-a*E(i);
+        I(i+1) = I(i) + a*E(i) - y*I(i);
+        R(i+1) = R(i) + y*I(i);
+    end
 end
 

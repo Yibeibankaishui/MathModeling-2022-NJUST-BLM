@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.19)
+project(Model_Omicron)
+
+set(CMAKE_CXX_STANDARD 14)
+
+include_directories(C)
+include_directories(${PROJECT_SOURCE_DIR}/C)
+
+
+
+
+add_executable(Model C/main.c C/func.c)
+target_link_libraries(Model LabelDetection
+                                ${OpenCV_LIBS})
+
+
