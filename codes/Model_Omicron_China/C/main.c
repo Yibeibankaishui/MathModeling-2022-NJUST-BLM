@@ -314,6 +314,7 @@ int main(int argc, char *argv[])
       // TRANSMISSION
       for (int i = 0; i < N_AGE; i++)
       {
+        // 12 vaccine cases (for 14 ages)
         num_vac_trans = FUNC_transmission(RNG, i, T_STEP, num_vac_trans, &STATE_S, VE_4_S, 1, &STATE_R, p_Gamma,
                                           p_OUTCOME, &save_STATE_S, &save_NEW_S, Kappa, p_foi, rate4DRUG, 1, 0);
 
@@ -461,26 +462,31 @@ int main(int argc, char *argv[])
         save_STATE_RDelta.S[i] = STATE_RDelta.S[i] + STATE_RDelta.C[i];
 
         // state_S_Is_H_ICU_D_byS-V1-V2-V3-V1E-V2E-V3E-V1W-V2W-V3W-R-RDelta
+        // S
         fprintf(f_save2, " %d %d %d %d", save_STATE_S.S[i], save_STATE_V1.S[i], save_STATE_V2.S[i], save_STATE_V3.S[i]);
         fprintf(f_save2, " %d %d %d", save_STATE_V1E.S[i], save_STATE_V2E.S[i], save_STATE_V3E.S[i]);
         fprintf(f_save2, " %d %d %d", save_STATE_V1W.S[i], save_STATE_V2W.S[i], save_STATE_V3W.S[i]);
         fprintf(f_save2, " %d %d", save_STATE_R.S[i], save_STATE_RDelta.S[i]);
 
+        // Is
         fprintf(f_save2, " %d %d %d %d", save_STATE_S.Is[i], save_STATE_V1.Is[i], save_STATE_V2.Is[i], save_STATE_V3.Is[i]);
         fprintf(f_save2, " %d %d %d", save_STATE_V1E.Is[i], save_STATE_V2E.Is[i], save_STATE_V3E.Is[i]);
         fprintf(f_save2, " %d %d %d", save_STATE_V1W.Is[i], save_STATE_V2W.Is[i], save_STATE_V3W.Is[i]);
         fprintf(f_save2, " %d %d", save_STATE_R.Is[i], save_STATE_RDelta.Is[i]);
 
+        // Hospital
         fprintf(f_save2, " %d %d %d %d", save_STATE_S.H[i], save_STATE_V1.H[i], save_STATE_V2.H[i], save_STATE_V3.H[i]);
         fprintf(f_save2, " %d %d %d", save_STATE_V1E.H[i], save_STATE_V2E.H[i], save_STATE_V3E.H[i]);
         fprintf(f_save2, " %d %d %d", save_STATE_V1W.H[i], save_STATE_V2W.H[i], save_STATE_V3W.H[i]);
         fprintf(f_save2, " %d %d", save_STATE_R.H[i], save_STATE_RDelta.H[i]);
 
+        // ICU
         fprintf(f_save2, " %d %d %d %d", save_STATE_S.ICU[i], save_STATE_V1.ICU[i], save_STATE_V2.ICU[i], save_STATE_V3.ICU[i]);
         fprintf(f_save2, " %d %d %d", save_STATE_V1E.ICU[i], save_STATE_V2E.ICU[i], save_STATE_V3E.ICU[i]);
         fprintf(f_save2, " %d %d %d", save_STATE_V1W.ICU[i], save_STATE_V2W.ICU[i], save_STATE_V3W.ICU[i]);
         fprintf(f_save2, " %d %d", save_STATE_R.ICU[i], save_STATE_RDelta.ICU[i]);
 
+        // Death
         fprintf(f_save2, " %d %d %d %d", save_STATE_S.D[i], save_STATE_V1.D[i], save_STATE_V2.D[i], save_STATE_V3.D[i]);
         fprintf(f_save2, " %d %d %d", save_STATE_V1E.D[i], save_STATE_V2E.D[i], save_STATE_V3E.D[i]);
         fprintf(f_save2, " %d %d %d", save_STATE_V1W.D[i], save_STATE_V2W.D[i], save_STATE_V3W.D[i]);
