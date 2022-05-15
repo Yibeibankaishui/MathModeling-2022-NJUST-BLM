@@ -48,12 +48,6 @@
 \item 问题4：根据建模结果，总结出一些对抗击疫情有积极作用的针对性建议，给有关部门进行参考。
 \end{enumerate}
 
-\begin{figure}[!h]
-\centering
-\includegraphics[width=.7\textwidth]{test.jpg}
-\caption{对雷达实施距离多假目标欺骗干扰示意图}
-\label{fig1}
-\end{figure}
 
 
 \section{模型假设}
@@ -63,12 +57,7 @@
 \item 假设个体对病毒的易感性相同
 \item 假设病毒传染性不变
 \end{enumerate}
-\begin{figure}[!h]
-\centering
-\includegraphics[width=.7\textwidth]{test.jpg}
-\caption{对雷达实施距离多假目标欺骗干扰示意图}
-\label{fig1}
-\end{figure}
+
 
 
 
@@ -77,13 +66,22 @@
 \begin{tabular}{cc}
  \hline
  \makebox[0.4\textwidth][c]{符号}	&  \makebox[0.5\textwidth][c]{意义} \\ \hline
- 	$N$	    & 宽度（cm） \\ \hline
+ 	$N_a$	    & 宽度（cm） \\ \hline
+	$S_a$	    & 宽度（cm） \\ \hline
+	$E_a$	    & 宽度（cm） \\ \hline
+	$I_{S,a}$	    & 宽度（cm） \\ \hline
+	$I_{S,a}^{drug}$	    & 宽度（cm） \\ \hline
+	$I_{S,a}^{naive}$	    & 宽度（cm） \\ \hline
+	$I_{A,a}$	    & 宽度（cm） \\ \hline
+	$H_a$	    & 宽度（cm） \\ \hline
+	$H_{N,a}$	    & 宽度（cm） \\ \hline
+	$ICU_a$	    & 宽度（cm） \\ \hline
     $\lambda_a$	    & 宽度（cm） \\ \hline
     $\beta$	    & 宽度（cm） \\ \hline
     $\phi$	    & 宽度（cm） \\ \hline
     $r_a$	    & 宽度（cm） \\ \hline
     $M$	    & 宽度（cm） \\ \hline
-    $\beta$	    & 宽度（cm） \\ \hline
+    $CM$	    & 接触矩阵 \\ \hline
     $\beta$	    & 宽度（cm） \\ \hline
     $\beta$	    & 宽度（cm） \\ \hline
  	L	           & 长度（cm）  \\ \hline
@@ -91,6 +89,14 @@
 
 \section{问题分析}
 \subsection{对上海疫情情况的调研}
+为了给对模型的分析提供参考，需要首先对上海疫情近期的发展情况以及政策变动进行调研。经过对近期新闻的搜集和整理，绘制疫情曲线和政策变动图如下所示
+\begin{figure}[!h]
+\centering
+\includegraphics[width=.9\textwidth]{shanghai_bianhua.png}
+\caption{上海防控政策的变化和疫情曲线}
+\label{fig3}
+\end{figure}
+\par 本轮奥密克戎疫情爆发以来，上海市陆续升级公共卫生干预措施对疫情进行管控。3 月12 日起，全市中小学调整为线上教学，幼儿园、托儿所停止入园，大学封闭。从3 月16 日起，对社区逐级开展“街镇-小区-楼栋”的区域化、网格化核酸筛查；3 月28 日5 时起浦东、浦南及毗邻区域实施封控，开展核酸筛查；4 月1 日开始全市封控；4 月10 日后划分封控区、管控区和防范区进行分级防控，因地制宜采取不同的防疫检测和防控措施。
 \subsection{对问题一的分析}
 问题一要求预测出上海在采取美国式“躺平”防疫政策的情况下会出现的疫情情况。首先我们需要对美国的防控策略进行调查，并利用现有的美国疫情数据推算出模型参数。最后将确定了参数的模型应用在上海的场景下，从而预测出可能的疫情规模。流程图如下所示
 \subsection{对问题二的分析}
@@ -109,14 +115,15 @@
 感染率
 \subsubsection{隔间模型 Compartment model}
 常用的模型是隔间模型
+
 \subsection{SIR模型}
 SIR模型的基本表达式：
 \begin{equation} \label{}
-    \begin{cases}
-        \frac{dS_p\left( t \right)}{dt}\,\,=\,\,-\frac{\lambda S_p\left( t \right) I_p\left( t \right)}{N}\\
-        \frac{dI_p\left( t \right)}{dt}\,\,=\,\,\frac{\lambda S_p\left( t \right) I_p\left( t \right)}{N}-\mu I_p\left( t \right)\\
-        \frac{dR_p\left( t \right)}{dt}\,\,=\,\,\mu I_p\left( t \right)\\
-    \end{cases}
+\begin{aligned}
+        &\frac{dS\left( t \right)}{dt}=-\frac{\lambda S\left( t \right) I_p\left( t \right)}{N}\\
+        &\frac{dI\left( t \right)}{dt}=\frac{\lambda S\left( t \right) I_p\left( t \right)}{N}-\mu I\left( t \right)\\
+        &\frac{dR\left( t \right)}{dt}=\mu I\left( t \right)\\
+\end{aligned}
 \end{equation}
 
 \par
@@ -139,15 +146,71 @@ SIR模型的基本表达式：
 \end{equation}
 
 \subsection{SLIRS模型}
-SLIRS（Susceptible-Lantent-Infectious-Removed-Susceptible）模型，将人群分成了易感人群、病毒携带者、感染者、退出人群。本文模型考虑到了病毒在不同年龄段中的传播特性、致病率、致死率等特性的差异，按14个年龄段划分人群。在人群中展开疫苗接种，能产生一定免疫效果，降低致病率和致死率；与此同时，采用疫苗种类、接种剂数、疫苗免疫效果的时变特性会带来抗病毒效果的差异。因此，本模型同时将。。。考虑抗病毒药物的效果，。。。
+SLIRS（Susceptible-Lantent-Infectious-Removed-Susceptible）模型是对SIR模型的拓展。相比于基础的SIR模型，SLIRS主要考虑到病毒携带者、因病去世者的存在以及康复者可能会反复感染。将人群分成了以下几种：
+\begin{enumerate}
+\item 易感人群（Susceptible）$S$指会被感染的人群
+\item 病毒携带人群（Lantent/Exposed）$E$指与感染者接触，但尚未感染的人群。这一类人群没有传染性，但会在一定时间内变为感染者。
+\item 感染者（Infectious）$I$指被病毒感染的人群，这类人一定具有传染性。根据症状有无，可以进一步分成无症状感染者（asymptomatic infectious）$I_a$和有症状感染者（symptomatic infectious）$I_s$。无症状感染者一般情况下不需要住院就能自愈，变为康复者；而有症状感染者根据病情严重性，在医疗资源足够的情况下，会进入普通病房或ICU病房
+\item 康复者（Recovered）$R$指刚从感染状态恢复健康的人群。这一类人因为曾被感染因而对病毒有较高的免疫力，但随着时间发展，其免疫力会逐步下降，最终转变为易感人群。
+\item 因病去世者（Deceased）$D$
+\item 住院病人（Hospitalized）$H$，可进一步划分为普通病房（包含方舱医院）病人和ICU病房病人。基于合理假设，这一类人通常不再有传染性，但可能会因病离世。
+
+\end{enumerate}
+\par 本文模型考虑到了病毒在不同年龄段中的传播特性、致病率、致死率等特性的差异，按14个年龄段划分人群。在人群中展开疫苗接种，能产生一定免疫效果，降低致病率和致死率；与此同时，采用疫苗种类、接种剂数、疫苗免疫效果的时变特性会带来抗病毒效果的差异。因此，本模型同时将。。。考虑抗病毒药物的效果，。。。
 \par 采用随机模型，符合二项分布。对每一个个体，其
 \subsubsection{年龄段的划分}
-\subsubsection{医疗资源}
-\subsubsection{药物治疗}
-\subsubsection{疫苗}
-\subsubsection{群体状态转变的马尔可夫过程}
-采用二项分布
+将人群按年龄段划分
+\subsubsection{接触矩阵}
+接触矩阵表述了不同年龄人群之间的接触频次。接触矩阵每一点的值$CM_{ij}$表示年龄段$i$平均每天接触到年龄段$j$的人数。即
 
+Dina等人的论文给出了对中国人口接触矩阵的估计
+\par 当政府实行管控措施时，会直接影响到接触矩阵的值。比如，当实行学校关闭的政策时，青少年年龄段的接触矩阵值会大幅减小；当实行全方面封控的时候，整个接触矩阵的值都会减小。接触矩阵的变化反应了管控措施的变化。
+\par 研究表明，相对于封锁期间，解封后平均每人每日接触人数恢复了5\%至17\%，但仍低于流行前接触水平的3-7倍。放松干预措施后大部分接触仍发生在家庭内部，工作场所和社区（家庭、学校、工作场所以外）的接触有所恢复，但家庭内部典型的同龄人接触和两代人接触的特征仍然在接触矩阵中占主导地位（图2）。
+\subsubsection{医疗资源}
+医疗资源的数量决定了社会对疫情的承受能力，当疫情处于高峰时期并且医疗资源不足时会出现医疗挤兑的情况，从而造成重症率和死亡率的提高。
+\par 假定在医院中，病毒不会进一步传播
+\begin{figure}[!h]
+\centering
+\includegraphics[width=.75\textwidth]{hospital.png}
+\caption{上海防控政策的变化和疫情曲线}
+\label{fig3}
+\end{figure}
+\subsubsection{药物治疗}
+抗病毒药物的使用能减轻病情，降低住院率、死亡率，缩短康复时间。本模型考虑抗病毒药物的效果，将有症状感染者划分为两类：一类是定期使用抗病毒药物的；另外一类不使用抗病毒药物。使用抗病毒药物的患者比例为$p_a^{drug}$。
+\subsubsection{疫苗}
+考虑
+\subsubsection{隔间模型状态转变的随机链式过程}
+\begin{figure}[!h]
+\centering
+\includegraphics[width=.75\textwidth]{seirhd.png}
+\caption{上海防控政策的变化和疫情曲线}
+\label{fig3}
+\end{figure}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=.75\textwidth]{Drug.png}
+\caption{上海防控政策的变化和疫情曲线}
+\label{fig3}
+\end{figure}
+
+
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.36\textwidth]{vaccine.png}
+\caption{上海防控政策的变化和疫情曲线}
+\label{fig3}
+\end{figure}
+
+\par 状态的转变均符合二项分布
+对于每一个易感者个体，其
+\begin{equation}
+\Delta S^e_a(t)\sim B(S_a(t),1-e^{-\lambda_a(t)})
+\end{equation}
+\begin{equation}
+\lambda_a(t)=\frac{1}{T}\sum_jCM_{aj}\cdot\beta\frac{I}{N}
+\end{equation}
 \subsection{考虑大规模疫苗接种的模型}
 \subsubsection{时间线分析}
 
@@ -173,6 +236,7 @@ SEIR模型
 \subsection{对问题一的求解}
 \subsection{对问题二的求解}
 \subsubsection{再生数的估计}
+对于SIR模型，再生数可以直接求出
 \subsection{对问题三的求解}
 
 \section{建议信}
