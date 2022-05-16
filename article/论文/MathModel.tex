@@ -58,12 +58,9 @@
 \item 假设病毒传染性不变
 \item 以一天作为模型的最小时间单元
 \end{enumerate}
-<<<<<<< HEAD
 
 
 
-=======
->>>>>>> 431e2e6148a3703fd3f9d6c536342e5538ff1d9f
 
 \par 其中针对经典的SIR模型及其变种，还有以下额外的假设：
 \begin{enumerate}
@@ -176,19 +173,11 @@ SIR模型是一种常见的描述传染病传播的数学模型，其基本假�
 
 SIR模型的基本表达式：
 \begin{equation} \label{}
-<<<<<<< HEAD
 \begin{aligned}
         &\frac{dS\left( t \right)}{dt}=-\frac{\lambda S\left( t \right) I_p\left( t \right)}{N}\\
         &\frac{dI\left( t \right)}{dt}=\frac{\lambda S\left( t \right) I_p\left( t \right)}{N}-\mu I\left( t \right)\\
         &\frac{dR\left( t \right)}{dt}=\mu I\left( t \right)\\
 \end{aligned}
-=======
-    \begin{cases}
-        \dfrac{dS\left( t \right)}{dt}\,\,=\,\,-\dfrac{\lambda S\left( t \right) I\left( t \right)}{N}\\
-        \dfrac{dI\left( t \right)}{dt}\,\,=\,\,\dfrac{\lambda S\left( t \right) I\left( t \right)}{N}-\mu I\left( t \right)\\
-        \dfrac{dR\left( t \right)}{dt}\,\,=\,\,\mu I\left( t \right)\\
-    \end{cases}
->>>>>>> 431e2e6148a3703fd3f9d6c536342e5538ff1d9f
 \end{equation}
 
 \par 其中:
@@ -384,11 +373,7 @@ p(R\vert H_a)=1-p_a^d
 \par 考虑疫苗效力的变化，将人群分为十二类：
 \begin{enumerate}
 \item $S,R,I$分别表示未接种过疫苗的易感者、康复者、感染者，未接种过疫苗的康复者对病毒有一定的免疫力，但免疫力会随时间逐渐减弱，最终经$1/\omega_R$时间重新变为易感者；
-<<<<<<< HEAD
 \item $V_1,V_2,B,$分别表示刚接种过第一针、第二针、加强针疫苗的人群。易感人群接种普通疫苗（第一、二针）的比例为$\alpha _{1}$，接种普通疫苗人群接种加强针的比例为$\alpha_VB$。疫苗生效时间分别是$1/\omega_1,1/\omega_3,1/\omega_4$；
-=======
-\item $V_1,V_2,B,$分别表示刚接种过第一针、第二针、加强针疫苗的人群。易感人群接种普通疫苗（第一、二针）的比例为$\alpha$疫苗生效时间分别是$\omega_1,\omega_3,\omega_4$；
->>>>>>> 431e2e6148a3703fd3f9d6c536342e5538ff1d9f
 \item $V_1^e,V_2^e,B^e$分别表示接种第一针、第二针、加强针且疫苗生效的人群；
 \item $V_2W,BW$表示接种过两剂、三剂疫苗但疫苗效力减退的人群，普通疫苗和加强针效力减退的平均时间为$1/\omega_P,1/\omega_B$；
 \item $R^V$表示接种过疫苗并且从感染中恢复的康复者，这类人群对病毒有更高的免疫力
@@ -1236,9 +1221,118 @@ int main(int argc, char *argv[])
 
   return 0;
 }
-
-
  \end{lstlisting}
+
+ \begin{lstlisting}[language=Matlab] 
+% 文件名：SIRMODEL.m
+% 拟合美国疫情参数，预测上海疫情数据的主函数
+% 读取文件数据
+M_america = xlsread('america_new.xlsx', 'Sheet1');
+M_SH = xlsread('shanghai_oyo.xlsx', 'Sheet1');
+M1 = M_america;
+M2 = M_SH;
+% 给定上海的真实值
+SH_sum = 26320000;
+SH_s0 = SH_sum - M2(1,2) - M2(1,3);
+SH_i0 = M2(1,3);
+SH_r0 = M2(1,2);
+% 给定美国的真实值
+global true_sum;
+global true_s;
+global true_i;
+global true_r;
+global I;
+true_sum = M1(:,6) - M1(:,4);
+true_s = true_sum - M1(:,1) - M1(:,2);
+true_i = M1(:,1) - M1(:,4) - M1(:,5);
+true_r = M1(:,5);
+
+% 设定预测时间
+% t_p = 60;
+% 输出初始参数值
+x0 = [0.1 0.1];
+VLB = [0 0];
+VUB = [2 1];
+% 计算目标函数值
+% f = SIR_Obj_Fuc(x0,t_p);
+[x, fval] = fmincon(@SIR_Obj_Fuc, x0, [], [], [], [], VLB, VUB);
+I = I.';
+[S_SH,I_SH,R_SH] = SIR_model_SH(75,x(1),x(2),SH_s0,SH_i0,SH_r0,SH_sum);
+I_SH = I_SH.';
+plot(1:75,I_SH,'b');
+  
+
+% 文件名：SIR_Obj_Fuc.m
+% 迭代求解拟合参数的函数
+function f = SIR_Obj_Fuc(x)
+%UNTITLED3 此处显示有关此函数的摘要
+%   此处显示详细说明
+%   x是待求取的变量，t是预测的时间
+global true_s true_i true_r true_sum I ;
+t_p = 100;
+r = x(1); 
+y = x(2);
+S0 = true_s(1); 
+I0 = true_i(1);
+R0 = true_r(1);
+N0 = true_sum(1);
+[S,I,R] = SIR_model(t_p,r,y,S0,I0,R0,N0);
+% plot(1:t_p,S,'r',1:t_p,I,'b',1:t_p,R,'g');
+% plot(1:t_p, I ,'r',1:t_p,true_i,'b');
+
+% f = sum((true_s(1:t_p) - S.').^2  + (true_i(1:t_p) - I.').^2 +  (true_r(1:t_p) - R.').^2);
+f = sum((true_i(1:t_p) - I.').^2 );
+end
+
+
+% 文件名：SIR_model.m
+% 迭代求解S、I、R各人群数量的函数
+function [S,I,R] = SIR_model(t,r,y,S0,I0,R0,N0)
+%SEIR_model 用于计算S、E、I、R四种人群的数量
+%   输出S、E、I、R为四种人群的数组
+%   输入参数：t为预测的时间,r为一个感染者每天接触的易感者人数，B为传染系数（就是把S人群变为E人群的概率）
+%   a为暴露者的发病率，y为恢复系数
+global true_sum;
+S(1)=S0;
+I(1)=I0;
+R(1)=R0;
+N(1)=N0;
+for i = 1:t-1
+    S(i+1) = S(i) - r*S(i)*I(i)/true_sum(t);
+    I(i+1) = I(i) + r*S(i)*I(i)/true_sum(t) - y*I(i);
+    R(i+1) = R(i) + y*I(i);
+end
+end
+
+
+% 文件名：SIRMODEL_SH.m
+% 求解上海市有效再生数随时间变化关系的主函数
+% 读取文件数据
+M_SH = xlsread('shanghai_oyo.xlsx', 'Sheet1');
+M2 = M_SH;
+% 给定上海的真实值
+global SH_sum SH_s SH_i SH_r I;
+SH_sum = 26320000;
+SH_s = SH_sum - M2(:,2) - M2(:,3);
+SH_i = M2(:,3);
+SH_r = M2(:,2);
+
+% 输出初始参数值
+x0 = [0.1 0.1];
+VLB = [0 0.05];
+VUB = [1 1];
+% 计算目标函数值
+% f = SIR_Obj_Fuc(x0,t_p);
+global k;
+k = 1;
+for i = 1:75
+   [x, fval] = fmincon(@SIR_Obj_Fuc_SH, x0, [], [], [], [], VLB, VUB);
+   R_t(k) = x(1)/x(2); 
+   k = k+1;
+end
+R_t= R_t.'
+I = I.';
+\end{lstlisting}
 
 
 \end{document} 
