@@ -16,15 +16,21 @@
  \maketitle
  \begin{abstract}
 概述
+在SIR模型的基础上，本文建立了SLIRS模型。建立的SLIRS(Susceptible-Latent-Infectous-Removed-Susceptible)模型是一个随机隔间模型，每一个隔间中的个体都会以一定的概率转换到另一个隔间。
+模型尽可能多地考虑了真实情况下的因素：
+首先，加入了密切接触者（病毒携带者）、因病去世者、住院患者；
+将感染者分成有症状感染者和无症状感染者，无症状患者可以自愈而有症状患者需要占用床位或使用药物；
+引入人口结构考虑不同人群对病毒的抵抗力；引入接触矩阵，可以模拟政府的防控措施；
+模型还考虑到了疫苗提供的免疫力，并且根据疫苗接种情况和疫苗现有效力将人群划分成了12类。
 \par 针对问题一，本文采用改进的SIRDT模型对美国2022年1月1日至2022年4月10的奥密克戎数据进行拟合，并将由BFGS求得的参数带入到上海市疫情的SIR模型中，
 对上海自2022年3月1日起的疫情数据进行了预测。
-\par 针对问题二
-\par 针对问题三
+\par 针对问题二，首先用贝叶斯方法估计出有效再生数为。。。，然后调整接触矩阵用SLIRS模型模拟出疫情曲线，累计病例数为。。。
+\par 针对问题三，首先依据现有政策，修改模型参数和接触矩阵，使用SLIRS模型进行模拟，得到疫情感染峰值为。。。清零时间为。。。
 \par 最后，基于模型预测出的结果，我们总结出了一些有利于控制病毒传播的策略，并写成给上海政府的建议书。
 
 
 
-\keywords {针对具体的问题列一到两个关键字\quad  建模算法列出\quad }
+\keywords {疫情预测\quad  隔间模型\quad SIR\quad SLIRS\quad 接触矩阵}
 \end{abstract}
 
 %\pagestyle{plain}
@@ -69,50 +75,89 @@
     
 
 \section{符号说明}
+
 \begin{tabular}{cc}
- \hline
- \makebox[0.4\textwidth][c]{符号}	&  \makebox[0.5\textwidth][c]{意义} \\ \hline
- 	$N_a$	    & 宽度（cm） \\ \hline
-	$S_a$	    & 宽度（cm） \\ \hline
-	$E_a$	    & 宽度（cm） \\ \hline
-	$I_{S,a}$	    & 宽度（cm） \\ \hline
-	$I_{S,a}^{drug}$	    & 宽度（cm） \\ \hline
-	$I_{S,a}^{naive}$	    & 宽度（cm） \\ \hline
-	$I_{A,a}$	    & 宽度（cm） \\ \hline
-	$H_a$	    & 宽度（cm） \\ \hline
-	$H_{N,a}$	    & 宽度（cm） \\ \hline
-	$ICU_a$	    & 宽度（cm） \\ \hline
-    $\lambda_a$	    & 宽度（cm） \\ \hline
-    $\beta$	    & 宽度（cm） \\ \hline
-    $\phi$	    & 宽度（cm） \\ \hline
-    $r_a$	    & 宽度（cm） \\ \hline
-    $M$	    & 宽度（cm） \\ \hline
-    $CM$	    & 接触矩阵 \\ \hline
-    $\beta$	    & 宽度（cm） \\ \hline
-    $\beta$	    & 宽度（cm） \\ \hline
- 	L	           & 长度（cm）  \\ \hline
-    $S\left( t \right) $    & $t$时刻预测的易感人数（人）  \\ \hline
-    $I\left( t \right) $ 	& $t$时刻预测的感染人数（人）  \\ \hline
-    $R\left( t \right) $ 	& $t$时刻预测的治愈人数（人）  \\ \hline
-    $N$	                        & 总人数（人）  \\ \hline
-    $\lambda$ 	                & 宽度（人） \\ \hline
-    $\mu$	                    & 长度（人）  \\ \hline
-\end{tabular}
+    \hline
+    \makebox[0.2\textwidth][c]{符号}	&  \makebox[0.5\textwidth][c]{意义} \\ \hline
+        $N_a$	    & 人口数 \\ \hline
+       $S_a$	    & 易受新冠感染的未接种疫苗的人群 \\ \hline
+       $E_a$	    & 携带病毒的人群 \\ \hline
+       $I_{S,a}$	    & 有症状感染者，包括$I_{S,a}^{drug}$和$I_{S,a}^{naive}$\\ \hline
+       $I_{S,a}^{drug}$	    & 服用药物的有症状感染者 \\ \hline
+       $I_{S,a}^{naive}$	    & 未服用药物的有症状感染者 \\ \hline
+       $I_{A,a}$	    & 无症状感染者 \\ \hline
+       $H_a$	    & 住院患者，包括$H_{N,a}$和$ICU_a$ \\ \hline
+       $H_{N,a}$	    & 住院（非ICU）患者 \\ \hline
+       $ICU_a$	    & ICU患者 \\ \hline
+       $D_a$	    & 去世人员 \\ \hline
+       $R_a$	    & 康复者\\ \hline
+       $V_{1,a}$	    & 接种了第一剂疫苗，且第一剂疫苗尚未生效的人群 \\ \hline
+       $V_{1,a}^{e}$	    & 接种第一剂疫苗且第一剂有效的人群 \\ \hline
+       $V_{2,a}$	    & 接种了第二剂疫苗，且第二剂尚未生效的人群 \\ \hline
+       $V_{2W,a}^{e}$	    & 接种第二剂疫苗且第二剂有效的人群 \\ \hline
+       $V_{2W,a}$	    & 接种第二剂疫苗，且主要疫苗接种保护已经减弱了六个月的人群 \\ \hline
+       $V_{B,a}$	    & 接种加强剂且加强剂尚未生效的人群 \\ \hline
+       $V_{B,a}^{e}$	    & 接种加强剂且加强剂已生效的人群 \\ \hline
+       $V_{BW,a}$	    & 接种加强剂疫苗，且加强剂疫苗的保护已经减弱的人群 \\ \hline
+       $R_{a}^{V}$	    & 已接种疫苗且从感染中恢复的的人群 \\ \hline
+       $\lambda_{a}(t)$	    & t时刻感染率 \\ \hline
+       $\beta$	    &传播率\\ \hline
+       $\varphi$	    &由NPI导致的传输率降低值\\ \hline
+       $r_a$	    &对SARS-CoV-2的易感性\\ \hline
+       $M_{a,\tilde{a}}$	    &个人与个人的平均每日接触次数\\ \hline
+       $\frac{1}{\gamma_E}$	    &潜伏期的平均持续时间（天）\\ \hline
+       $\frac{1}{\gamma_I}$	    &平均感染期（天）\\ \hline
+       $k$	    &无症状个体相对于有症状个体的传染性\\ \hline
+
+      
+   \end{tabular}
+
+   \begin{tabular}{cc}
+       \hline
+       \makebox[0.2\textwidth][c]{符号}	&  \makebox[0.5\textwidth][c]{意义} \\ \hline
+          
+   
+          $\frac{1}{\gamma_{SH}}$	    &从症状出现到住院的平均时间（天）\\ \hline
+          $\frac{1}{\gamma_{HD}}$	    &从住院（非ICU）到死亡的平均时间（天）\\ \hline
+          $\frac{1}{\gamma_{UD}}$	    &从ICU入院到死亡的平均时间（天）\\ \hline
+          $\frac{1}{\gamma_{HR}}$	    &康复前住院时间（天）\\ \hline
+          $\frac{1}{\gamma_{UR}}$	    &康复前的ICU住院时间（天）\\ \hline
+          $p_a^s$	    &出现症状的未接种疫苗感染的年龄相关比例\\ \hline
+          $p_a^h$	    &需要住院治疗的未接种症状性感染的年龄相关比例\\ \hline
+          $p_a^{HD}$	    &未接种疫苗的住院（非ICU）患者的年龄相关死亡率\\ \hline
+          $p_a^{UD}$	    &未接种ICU患者的年龄相关死亡率\\ \hline
+          $p_a^{icu}$	    &需要ICU的未接种疫苗住院患者的年龄相关比例\\ \hline
+   
+   
+          $\frac{1}{\omega_1}$	    &第一剂给药和第一剂完全保护之间的平均间隔（天）\\ \hline
+          $\frac{1}{\omega_2}$	    &第一剂完全保护与第二剂给药之间的平均间隔时间（天）\\ \hline
+          $\frac{1}{\omega_3}$	    &第二剂给药和第二剂完全保护之间的平均间隔（天）\\ \hline
+          
+          $\frac{1}{\omega_P}$	    &第二剂完全生效和给予增强剂之间的平均间隔（天）\\ \hline
+          $\frac{1}{\omega_4}$	    &接种增强针和增强针完全生效之间的平均间隔（天）\\ \hline
+          $\frac{1}{\omega_B}$	    &加强针完全有效和加强失效之间的平均间隔（天）\\ \hline
+          $\frac{1}{\omega_R}$	    &从先前感染中获得的保护的平均持续时间（天）\\ \hline
+
+          $S\left( t \right) $    & $t$时刻预测的易感人数（人）  \\ \hline
+          $I\left( t \right) $ 	& $t$时刻预测的感染人数（人）  \\ \hline
+          $R\left( t \right) $ 	& $t$时刻预测的治愈人数（人）  \\ \hline
+      \end{tabular}
+
 
 \section{问题分析}
 \subsection{对上海疫情情况的调研}
-为了给对模型的分析提供参考，需要首先对上海疫情近期的发展情况以及政策变动进行调研。经过对近期新闻的搜集和整理，绘制疫情曲线和政策变动图如下所示
+为了给对模型的分析提供参考，需要首先对上海疫情近期的发展情况以及政策变动进行调研。经过对近期新闻的搜集和整理，绘制疫情曲线和政策变动图如图\ref{sh}所示
 \begin{figure}[!h]
 \centering
 \includegraphics[width=.9\textwidth]{shanghai_bianhua.png}
 \caption{上海防控政策的变化和疫情曲线}
-\label{fig3}
+\label{sh}
 \end{figure}
 \par 本轮奥密克戎疫情爆发以来，上海市陆续升级公共卫生干预措施对疫情进行管控。3 月12 日起，全市中小学调整为线上教学，幼儿园、托儿所停止入园，大学封闭。从3 月16 日起，对社区逐级开展“街镇-小区-楼栋”的区域化、网格化核酸筛查；3 月28 日5 时起浦东、浦南及毗邻区域实施封控，开展核酸筛查；4 月1 日开始全市封控；4 月10 日后划分封控区、管控区和防范区进行分级防控，因地制宜采取不同的防疫检测和防控措施。
 \subsection{对问题一的分析}
 问题一要求预测出上海在采取美国式“躺平”防疫政策的情况下会出现的疫情情况。首先我们需要对美国的防控策略进行调查，并利用现有的美国疫情数据推算出模型参数。最后将确定了参数的模型应用在上海的场景下，从而预测出可能的疫情规模。流程图如下所示
 \subsection{对问题二的分析}
-问题二要求根据上海市政府初期的精准防控策略，估计本次疫情的发展规模，并且估计在此策略下的再生数。
+问题二要求根据上海市政府初期的精准防控策略，估计本次疫情的发展规模，并且估计在此策略下的再生数。首先根据上海的精准防控策略调整接触矩阵
 \subsection{对问题三的分析}
 问题三要求预测在上海实施了严格防疫管控措施的情况下的疫情趋势。
 
@@ -258,7 +303,7 @@ SLIRS（Susceptible-Lantent-Infectious-Removed-Susceptible）模型是对SIR模�
 接触矩阵表述了不同年龄人群之间的接触频次。接触矩阵每一点的值$CM_{ij}$表示年龄段$i$平均每天接触到年龄段$j$的人数。Dina等人的论文\cite{}给出了对中国人口接触矩阵的估计。
 
 \par 因此，我们可以通过调整接触矩阵的值来模拟政府的管控措施，如图\ref{cm}分别绘制了无疫情期间、关闭学校、关闭学校和工作场所、全市封控情况下的接触矩阵。可见，一般情况下，同龄人之间的接触最为频繁，因而矩阵对角线上及其周围的值较大；在封闭学校的情况下，青少年年龄段的接触减少；全市封控的情况下，整个矩阵的元素值均大幅减小。
-\par 研究表明，相对于封锁期间，解封后平均每人每日接触人数恢复了5\%至17\%，但仍低于流行前接触水平的3-7倍。放松干预措施后大部分接触仍发生在家庭内部，工作场所和社区（家庭、学校、工作场所以外）的接触有所恢复，但家庭内部典型的同龄人接触和两代人接触的特征仍然在接触矩阵中占主导地位（图2）。
+
 \begin{figure}[!h]
 \centering
 \includegraphics[width=1\textwidth]{4CM.png}
@@ -304,6 +349,10 @@ SLIRS（Susceptible-Lantent-Infectious-Removed-Susceptible）模型是对SIR模�
 \begin{equation}
 p(E_a\vert S_a)=\lambda_a=1-\exp(-\lambda_aV_e^{inf}) 
 \end{equation}
+$\lambda_a$与接触矩阵有关，其表达式为
+\begin{equation}
+  \lambda_a(t)=\frac{1}{T}\sum_jCM_{aj}\cdot\beta\frac{I}{N}
+\end{equation}
 \par 人群$E$平均经过$1/\gamma_E$时间会转变为病毒感染者$I$，每个个体的转移概率为
 \begin{equation}
 p(I_a\vert E_a)=\frac{1}{\gamma_E}
@@ -336,14 +385,12 @@ p(D\vert H_a)=p_a^d
 \begin{equation}
 p(R\vert H_a)=1-p_a^d
 \end{equation}
-\par 状态的转变均符合二项分布
-对于每一个易感者个体，其
+\par 根据每个个体状态转换的概率可以确定每天特定人群人数的变化量。
+以易感者群体为例，其变化量服从二项分布，即
 \begin{equation}
 \Delta S^e_a(t)\sim B(S_a(t),1-e^{-\lambda_a(t)})
 \end{equation}
-\begin{equation}
-\lambda_a(t)=\frac{1}{T}\sum_jCM_{aj}\cdot\beta\frac{I}{N}
-\end{equation}
+
 \subsubsection{医疗资源}
 医疗资源的数量决定了社会对疫情的承受能力，当疫情处于高峰时期并且医疗资源不足时会出现医疗挤兑的情况，从而造成重症率和死亡率的提高。因此将占有医疗资源（普通床位、ICU床位）的人群也考虑在隔室模型中，有利于分析医疗资源数量对疫情趋势的影响，从而给政府
 \par 假定在医院中，病毒不会进一步传播
