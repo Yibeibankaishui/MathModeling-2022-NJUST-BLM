@@ -65,9 +65,6 @@
 \item 以一天作为模型的最小时间单元
 \end{enumerate}
 
-
-
-
 \par 其中针对经典的SIR模型及其变种，还有以下额外的假设：
 \begin{enumerate}
     \item 易感者与患病者有效接触即被感染，变为患病者，可被治愈变为康复者，无潜伏期，有终身免疫力。
@@ -400,7 +397,15 @@ p(R\vert H_a)=1-p_a^d
 \caption{上海防控政策的变化和疫情曲线}
 \label{hos}
 \end{figure}
-如图\ref{hos}所示，有症状感染者$I_S$以$p_a^h\gamma_{SH}$的概率会被转运到医院，其中$p_a^h$是有症状感染者中有医院治疗需求的比例，$1/\gamma_{SH}$是有症状感染者被转运至医院的平均天数；转运至医院的人群中，又有占$p_a^{icu}$比例的患者会被转运至ICU；占有两类病床的人群，其死亡率、平均死亡天数、平均康复天数分别为$p_a^{HD}$、$p_a^{UD}$、$1/\gamma_{HD}$、$1/\gamma_{UD}$、$1/\gamma_{HR}$、$1/\gamma_{UR}$。
+\par 如图\ref{hos}所示，有症状感染者$I_S$以$p_a^h\gamma_{SH}$的概率会被转运到医院，其中$p_a^h$是有症状感染者中有医院治疗需求的比例，$1/\gamma_{SH}$是有症状感染者被转运至医院的平均天数；转运至医院的人群中，又有占$p_a^{icu}$比例的患者会被转运至ICU；占有两类病床的人群，其死亡率、平均死亡天数、平均康复天数分别为$p_a^{HD}$、$p_a^{UD}$、$1/\gamma_{HD}$、$1/\gamma_{UD}$、$1/\gamma_{HR}$、$1/\gamma_{UR}$。
+结合之前对总体状态转移图的分析，有
+\begin{equation}
+p(D\vert H_a)=p_a^d=p_a^{HD}\frac{1}{\gamma_{HD}}+p_a^{HD}\frac{1}{\gamma_{HD}}
+\end{equation}
+
+\begin{equation}
+p(R\vert H_a)=1-p_a^d=(1-p_a^{HD})\frac{1}{\gamma_{HR}}+(1-p_a^{UD})\frac{1}{\gamma_{UR}}
+\end{equation}
 \subsubsection{药物治疗}
 抗病毒药物的使用能减轻病情，降低住院率、死亡率。本模型考虑抗病毒药物的效果，将有症状感染者划分为两类：一类是定期使用抗病毒药物的；另外一类不使用抗病毒药物。使用抗病毒药物的患者比例为$p_a^{drug}$。
 \begin{figure}[!h]
@@ -409,15 +414,28 @@ p(R\vert H_a)=1-p_a^d
 \caption{药物}
 \label{drug}
 \end{figure}
-如图\ref{drug}，$p_a^s$是产生症状的感染者的比例，只有有症状感染者需要接受药物治疗，$p_a^{drug}$是有症状感染者中使用抗病毒药物的比例。药物治疗降低了重症率和死亡率，因此接受药物治疗的患者需要住院的比例更小，为$(1-\epsilon_{drug})p_a^h$。
+\par 如图\ref{drug}，$p_a^s$是产生症状的感染者的比例，只有有症状感染者需要接受药物治疗。$p_a^{drug}$是有症状感染者中使用抗病毒药物的比例。药物治疗降低了重症率和死亡率，因此接受药物治疗的患者需要住院的比例更小。$epsilon_{drug}$表示抗病毒药物的效力。使用抗病毒药物的感染者住院和康复的概率分别为
+\begin{equation}
+p(H\vert I_S^{drug})=(1-\epsilon_{drug})p_a^h\frac{1}{\gamma_{SH}}
+\end{equation}
+\begin{equation}
+p(R\vert I_S^{drug})=(1-(1-\epsilon_{drug})p_a^h)\frac{1}{\gamma_I}
+\end{equation}
+不使用抗病毒药物的感染者住院和自然康复的概率：
+\begin{equation}
+p(H\vert I_S^{naive})=p_a^h\frac{1}{\gamma_{SH}}
+\end{equation}
+\begin{equation}
+p(R\vert I_S^{naive})=(1-p_a^h)\frac{1}{\gamma_I}
+\end{equation}
 \begin{figure}[!h]
 \centering
 \includegraphics[width=0.36\textwidth]{vaccine.png}
 \caption{上海防控政策的变化和疫情曲线}
-\label{fig3}
+\label{vac}
 \end{figure}
 \subsubsection{疫苗}
-\par 考虑疫苗效力的变化，将人群分为十二类：
+\par 如图\ref{vac}，考虑疫苗效力的变化，将人群分为十二类：
 \begin{enumerate}
 \item $S,R,I$分别表示未接种过疫苗的易感者、康复者、感染者，未接种过疫苗的康复者对病毒有一定的免疫力，但免疫力会随时间逐渐减弱，最终经$1/\omega_R$时间重新变为易感者；
 \item $V_1,V_2,B,$分别表示刚接种过第一针、第二针、加强针疫苗的人群。易感人群接种普通疫苗（第一、二针）的比例为$\alpha _{1}$，接种普通疫苗人群接种加强针的比例为$\alpha_VB$。疫苗生效时间分别是$1/\omega_1,1/\omega_3,1/\omega_4$；
@@ -426,8 +444,6 @@ p(R\vert H_a)=1-p_a^d
 \item $R^V$表示接种过疫苗并且从感染中恢复的康复者，这类人群对病毒有更高的免疫力
 \end{enumerate}
 \par 疫苗效力的状态转移与之前所述的状态转移是并行过程。
-
-\subsection{考虑大规模疫苗接种的模型}
 \subsubsection{时间线分析}
 
 对于美国的疫情数据
