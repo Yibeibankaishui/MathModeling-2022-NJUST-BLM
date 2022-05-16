@@ -1,5 +1,6 @@
 \documentclass[bwprint]{gmcmthesis}
 \usepackage{amsmath}
+\usepackage{url}
 \numberwithin{figure}{section}
 \renewcommand{\thefigure}{\arabic{section}-\arabic{figure}} 
 % \documentclass[withoutpreface,bwprint]{cumcmthesis}
@@ -7,25 +8,23 @@
 
 \title{中国研究生数学建模竞赛论文标题}
 \baominghao{No.00000001} %参赛队号
-\schoolname{XX大学/学院}%学校名称
-\membera{队员A} %队员A
-\memberb{队员B} %队员B
-\memberc{队员C} %队员C
+\schoolname{南京理工大学/自动化学院}%学校名称
+\membera{白宇铖} %队员A
+\memberb{李文睿} %队员B
+\memberc{马寅锐} %队员C
 \begin{document}
  \maketitle
  \begin{abstract}
 概述
-\par 针对问题一
+\par 针对问题一，本文采用改进的SIRDT模型对美国2022年1月1日至2022年4月10的奥密克戎数据进行拟合，并将由BFGS求得的参数带入到上海市疫情的SIR模型中，
+对上海自2022年3月1日起的疫情数据进行了预测。
 \par 针对问题二
 \par 针对问题三
 \par 最后，基于模型预测出的结果，我们总结出了一些有利于控制病毒传播的策略，并写成给上海政府的建议书。
 
 
 
-
-
-
-\keywords{针对具体的问题列一到两个关键字\quad  建模算法列出\quad }
+\keywords {针对具体的问题列一到两个关键字\quad  建模算法列出\quad }
 \end{abstract}
 
 %\pagestyle{plain}
@@ -57,21 +56,20 @@
 
 
 \section{模型假设}
+\par 以下对本文中的模型进行一些基本的假设
 \begin{enumerate}
 \item 假设气候因素（温度、湿度）对病毒传播无影响
 \item 假设人口总数在预测区间内恒定
 \item 假设个体对病毒的易感性相同
 \item 假设病毒传染性不变
+\item 以一天作为模型的最小时间单元
 \end{enumerate}
-\begin{figure}[!h]
-\centering
-\includegraphics[width=.7\textwidth]{test.jpg}
-\caption{对雷达实施距离多假目标欺骗干扰示意图}
-\label{fig1}
-\end{figure}
 
-
-
+\par 其中针对经典的SIR模型及其变种，还有以下额外的假设：
+\begin{enumerate}
+    \item 易感者与患病者有效接触即被感染，变为患病者，可被治愈变为康复者，无潜伏期，有终身免疫力。
+\end{enumerate}
+    
 
 \section{符号说明}
 \begin{tabular}{cc}
@@ -87,6 +85,12 @@
     $\beta$	    & 宽度（cm） \\ \hline
     $\beta$	    & 宽度（cm） \\ \hline
  	L	           & 长度（cm）  \\ \hline
+    $S\left( t \right) $    & $t$时刻预测的易感人数（人）  \\ \hline
+    $I\left( t \right) $ 	& $t$时刻预测的感染人数（人）  \\ \hline
+    $R\left( t \right) $ 	& $t$时刻预测的治愈人数（人）  \\ \hline
+    $N$	                        & 总人数（人）  \\ \hline
+    $\lambda$ 	                & 宽度（人） \\ \hline
+    $\mu$	                    & 长度（人）  \\ \hline
 \end{tabular}
 
 \section{问题分析}
@@ -97,6 +101,7 @@
 问题二要求根据上海市政府初期的精准防控策略，估计本次疫情的发展规模，并且估计在此策略下的再生数。
 \subsection{对问题三的分析}
 问题三要求预测在上海实施了严格防疫管控措施的情况下的疫情趋势。
+
 \section{数学模型}
 介绍主流的方法
 时间序列方法、机器学习方法、传统方法（SIR模型及其变种）
@@ -110,33 +115,72 @@
 \subsubsection{隔间模型 Compartment model}
 常用的模型是隔间模型
 \subsection{SIR模型}
+SIR模型是一种常见的描述传染病传播的数学模型，其基本假设是将人群分为以下三类：
+
+\begin{itemize}
+    \item 易感人群（Susceptible）：指未得病者，但缺乏免疫能力，与感病者接触后容易受到感染。对与COVID-19而言，除去易感染者和康复者，几乎所有人都是易感者。
+    \item 感染人群（Infective）：指染上传染病的人，他可以传播给易感人群。
+    \item 移除人群（Removed）：被移出系统的人。因病愈（具有免疫力）或死亡的人。这部分人不再参与感染和被感染过程。
+\end{itemize}
+
 SIR模型的基本表达式：
 \begin{equation} \label{}
     \begin{cases}
-        \frac{dS_p\left( t \right)}{dt}\,\,=\,\,-\frac{\lambda S_p\left( t \right) I_p\left( t \right)}{N}\\
-        \frac{dI_p\left( t \right)}{dt}\,\,=\,\,\frac{\lambda S_p\left( t \right) I_p\left( t \right)}{N}-\mu I_p\left( t \right)\\
-        \frac{dR_p\left( t \right)}{dt}\,\,=\,\,\mu I_p\left( t \right)\\
+        \dfrac{dS\left( t \right)}{dt}\,\,=\,\,-\dfrac{\lambda S\left( t \right) I\left( t \right)}{N}\\
+        \dfrac{dI\left( t \right)}{dt}\,\,=\,\,\dfrac{\lambda S\left( t \right) I\left( t \right)}{N}-\mu I\left( t \right)\\
+        \dfrac{dR\left( t \right)}{dt}\,\,=\,\,\mu I\left( t \right)\\
     \end{cases}
 \end{equation}
 
-\par
-其中一些基本符号的解释如下表所示：
-
-\begin{tabular}{cc}
-    \hline
-    \makebox[0.4\textwidth][c]{符号}	&  \makebox[0.5\textwidth][c]{意义} \\ \hline
-    $S_p\left( t \right) $    & $t$时刻预测的易感人数（人）  \\ \hline
-    $I_p\left( t \right) $ 	& $t$时刻预测的感染人数（人）  \\ \hline
-    $R_p\left( t \right) $ 	& $t$时刻预测的治愈人数（人）  \\ \hline
-    $N$	                        & 总人数（人）  \\ \hline
-    $\lambda$ 	                & 宽度（人） \\ \hline
-    $\mu$	                    & 长度（人）  \\ \hline
-\end{tabular}
-
-其中:
+\par 其中:
 \begin{equation} \label{}
-    N\,\,=\,\,S_p\left( t \right) +I_p\left( t \right) +R_p\left( t \right) 
+    N\,\,=\,\,S\left( t \right) +I\left( t \right) +R\left( t \right) 
 \end{equation}
+
+\par 其具体流程图如下图所示：
+\begin{figure}[!h]
+\centering
+\includegraphics[width=.7\textwidth]{./SIRMODEL.png}
+\caption{SIR传染病模型传播示意图}
+\label{fig1}
+\end{figure}
+
+\subsection{SIRDT模型}
+\par 此为本文提出的SIR模型的拓展模型，美国自2020年3月开始，已经累计死亡了102万人，占到了美国总人口数的0.3$\%$。为了保证拟合、预测效果的准确性，我们
+将模型优化为了SIRDT模型，其相对于经典的SIR模型主要有以下两点改动：
+
+\begin{enumerate}
+    \item 总人数$N$不再是固定不变的，而是会根据累计的死亡数据动态调整。我们假定除COVID-19造成的死亡以外的所有出生、死亡数据能够保持均衡。
+    \item 增加了因COVID-19死亡的人群$D$（Death）。
+\end{enumerate}
+
+\par 其中我们用于计算参数的SIRDT模型公式如下所示：
+
+\begin{equation} \label{}
+    \begin{cases}
+        \dfrac{dS\left( t \right)}{dt}\,\,=\,\,-\dfrac{\lambda S\left( t \right) I\left( t \right)}{N\left( t \right)}\\
+        \dfrac{dI\left( t \right)}{dt}\,\,=\,\,\dfrac{\lambda S\left( t \right) I\left( t \right)}{N\left( t \right)}-\mu I\left( t \right)\\
+        \dfrac{dR\left( t \right)}{dt}\,\,=\,\,\mu I_p\left( t \right)\\
+        N\left( t \right) \,\,=\,\,N-D_r\left( t \right)\\
+    \end{cases}
+\end{equation}
+
+\par 其中累计死亡人数我们不再另设参数来计算，而是直接使用利用采集到的美国疫情的死亡数据，而在上海的感染人数的计算值中，由于累计死亡人数目前是578人
+占到上海总人口数的0.0022$\%$,所以我们在上海市的感染人数预测中暂时忽略死亡人数对总人数的影响。
+
+\par 综上所述，所以其实我们最后使用了两个模型，一个考虑死亡人数来计算更精确的模型参数，一个根据实际情况忽略死亡人数的影响。
+
+\par 其中$N$为美国的总人口数，$D\left( t \right)$为当日累计的死亡数据。
+
+\par 改进后的SIRDT模型的传播示意图如下图所示：
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=.7\textwidth]{./SIRDTMODEL.png}
+    \caption{SIRDT传染病模型传播示意图}
+    \label{fig1}
+\end{figure}
+
 
 \subsection{SLIRS模型}
 SLIRS（Susceptible-Lantent-Infectious-Removed-Susceptible）模型，将人群分成了易感人群、病毒携带者、感染者、退出人群。本文模型考虑到了病毒在不同年龄段中的传播特性、致病率、致死率等特性的差异，按14个年龄段划分人群。在人群中展开疫苗接种，能产生一定免疫效果，降低致病率和致死率；与此同时，采用疫苗种类、接种剂数、疫苗免疫效果的时变特性会带来抗病毒效果的差异。因此，本模型同时将。。。考虑抗病毒药物的效果，。。。
@@ -163,14 +207,194 @@ SEIR模型
 
 \section{问题求解}
 \subsection{数据搜集与预处理}
-数据来源为“Our World In Data”网站。
-本文使用了BFGS算法来进行 $\lambda$ 与 $\mu$ 的计算。
-根据我们现有的美国奥密克戎毒株的有关数据，可以根据这些数据求出相应的参数。那么，可以求解下面的最小二乘问题以估计曲线的参数：
+\par 对于问题一，既然需要拟合参数并进行预测，那么至少需要以下的两组数据：
+
+\begin{enumerate}
+    \item 美国COVID-19的相关数据，包括现有病例、治愈数量、死亡人数等。
+    \item 中国上海疫情爆发初期的相关数据，用来作为模型的初始数据并进行比对。
+\end{enumerate}
+
+\par 有关美国COVID-19的相关数据可以在“Our World In Data”网站上找到，该网站记录了美国2020年3月至今的
+所有疫情数据，便于我们用于拟合SIRDT模型的参数。
+
+\par 值得一提的是，由于此次上海疫情的病毒株为传染性极强的奥密克戎变异毒株，所以美国在2020年至2021年的
+前期疫情数据并不好直接用于模型参数的拟合，因为普通毒株、$\beta$毒株的基本再生数$R_0$并不相同，所以缺少
+一些针对性。
+
+\par 通过相关数据的收集，我们发现从今年一月份开始，美国新冠患者中奥密克戎毒株的份额就已经接近90$\%$了，如
+下图所示，这意味着美国今年一月份开始的新冠数据对奥密克戎毒株有较强的针对性。
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=.7\textwidth]{./OmicronVariarntshare.png}
+    \caption{奥密克戎毒株所占份额图}
+    \label{fig1}
+\end{figure}
+
+\par 对于缺失的数据，本文使用了双周期移动平均方法来进行填补，下面将简要介绍双周期移动平均方法，主要公式如下所示:
+
+\begin{equation}
+    S_{t}^{'}=\dfrac{x_t+x_{t-1}+\cdots x_{t-N+1}}{N}
+\end{equation}
+
+\begin{equation}
+    S_{t}^{''}=\dfrac{S_{t}^{'}+S_{t-1}^{'}+\cdots S_{t-N+1}^{'}}{N}
+\end{equation}
+
+\begin{equation}
+    a_t=2S_{t}^{'}-2S_{t}^{''}
+\end{equation}
+
+\begin{equation}
+    b_t=\dfrac{2}{N-1}\left( S_{t}^{'}-S_{t}^{''} \right) 
+\end{equation}
+
+\begin{equation}
+    F_{t+1}=a_t+b_t
+\end{equation}
+
+\par 其中式（1）用于计算一次移动平均值， 式（2）用于计算二次移动平均值，式（3）
+用于对最新值的初始点进行基本修正，使预测值和实际值之间不存在滞后现象，式（4）表示
+移动平均值是对N个点求平均值，这一平均值应落在N个点的中点，式（5）用于计算下一期预测值。
+以上海市的治愈数据为例，下面为其对比图：
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=.9\textwidth]{./Cured.png}
+    \caption{治愈人数补全前后的对比图}
+    \label{fig1}
+\end{figure}
+
+\subsection{对问题一的求解}
+\subsubsection{模型求解与结论}
+\par 为了求解模型，我们首先将SIRDT模型离散化，以天为单位来构建$S$、$I$、$R$的差分方程，具体如下
+所示。
+
+\begin{equation} \label{}
+    \begin{cases}
+        S\left( t+1 \right) =S\left( t \right) -\dfrac{\lambda S\left( t \right) I\left( t \right)}{N\left( t \right)}\\
+        I\left( t+1 \right) =I\left( t \right) +\dfrac{\lambda S\left( t \right) I\left( t \right)}{N\left( t \right)}-\mu I\left( t \right)\\
+        R\left( t+1 \right) =R\left( t \right) +\mu I_p\left( t \right)\\
+        N\left( t \right) =N-D\left( t \right)\\
+    \end{cases}
+\end{equation}
+
+
+\par 待求解的目标函数：
+
 \begin{equation} \label{}
     \underset{\lambda ,\mu}{\min}\frac{1}{2}\underset{t=1}{\overset{T}{\varSigma}}\left\| I_r\left( t \right) -I_p\left( t \right) \right\| ^2
 \end{equation}
-其中
-\subsection{对问题一的求解}
+
+\par 本文使用了BFGS算法来进行参数 $\lambda$ 与 $\mu$ 的拟合。
+
+\par BFGS散发是一种逆秩2拟牛顿法，它由Broyden、Fletcher、Goldfarb、Shanno发明出来，到现在的40多年时间里，
+仍然被认为是最好的拟牛顿算法。下面将简述其原理：
+
+\par 其出现的原因就是$H$矩阵求逆非常困难，计算复杂度非常高。BFGS的核心思想就是通过$D_k$
+矩阵迭代来代替${H_k}^{-1}$。其逼近公式如下所示：
+
+\begin{equation} \label{}
+    D_{k+1}=\left( I-\frac{s_ky_{k}^{T}}{y_{k}^{T}s_k} \right) D_k\left( I-\dfrac{y_ks_{k}^{T}}{y_{k}^{T}s_k} \right) +\dfrac{s_ks_{k}^{T}}{y_{k}^{T}s_k}
+\end{equation}
+
+\par 其迭代过程解释如下：
+
+\begin{itemize}
+    \item[1)] 其中$I$为单位矩阵，$D_1$的初始值也设置为单位矩阵$I$;
+    \item[2)] 首先随机一个$\vec{x}_1$，那么就可以计算的带损失函数在$\vec{x}_1$处的梯度$g_1$;
+    \item[3)] $\vec{x}_2=\vec{x}_1-D_1\cdot g_1$，通过此式可以得到$\vec{x}_2$，同时也可以求得$g_2$;
+    \item[4)] $s_1=\vec{x}_1-\vec{x}_2$,通过此式可以求得$s_1$;
+    \item[5)] $y_1=g_2-g_1$，通过此式可以得到$y_1$;
+    \item[6)] 将以上结果带入公式（6）即可得到$D_2$;
+    \item[7)] 再用$D_2$来计算$\vec{x}_3$，……，然后不断进行迭代；
+    \item[8)] 当$D_n$达到一定的阈值时，停止迭代，此时的$D_n$就可以近似看作${H_k}^{-1}$的值。
+\end{itemize}
+
+\par 由于此模型的雅克比矩阵较难求取，所以本文采用了数值梯度的求解方法，在Matlab中使用fmincon函数
+来进行了$\lambda$ 与 $\mu$参数的拟合。
+
+\par 根据我们整理的美国奥密克戎毒株自2022年1月1日起的有关数据，拟合出了对应的参数
+$\lambda = 0.1345$， $\mu = 0.0768$。并通过以下公式计算出了美国奥密克戎毒株毒株的再生数：
+
+\begin{equation}
+    R_t=\dfrac{\lambda}{\mu}
+\end{equation}
+
+\par 计算结果为$R_t=1.75$，相比于奥密克戎的基本再生数$R_0=7$已经降低了很多，这说明接种育苗、戴口罩等措施确实
+能够有效减少病毒的传播，这相比这与美国官方所公布的1.0左右的有效再生数相差甚远，也间接说明美国
+的防疫政策并没有他们所鼓吹的那么出色，在不进行精准防控的情况下，奥密克戎仍有着很强的传染率。
+\par 下面是预测数据与真实数据的对比图像：
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=.9\textwidth]{./SIRDT_America.png}
+    \caption{SIRDT模型下美国感染人群的预测}
+    \label{fig1}
+\end{figure}
+
+\par 所取的数据为2022年1月1日后100天内美国的奥密克戎毒株的疫情数据，可以看到，在奥密克戎刚刚出现的时候，美国的
+感染人数也是一路飙升，最大现有感染人数最多达到了2700万人，在政府干预后也是慢慢进入到了下降阶段。
+\par 之后将计算得到的$\lambda$ 与 $\mu$参数带入经典SIR模型，并以上海3月1日的疫情数据为初始值，即可计算未来两个月
+内的发展趋势与累计病例数。其中上海的疫情初始值根据相关数据设置为：
+
+\begin{equation}
+    S_0=26315612\text{，}I_0=607\text{，}R_0=3781\text{，}N=26320000
+\end{equation}
+
+
+\par 值得一提的是，为了保证SIR模型的有效性，上海的疫情数据需要做如下的几点处理：
+\begin{itemize}
+    \item 上海由于本身经历过数次新冠疫情，网络上所获得的疫情数据都是包含前几次疫情的累计确诊与治愈数据，
+不能直接拿来进行预测，所以需要进行一些简单的数据处理。在本文中，我们选取3月1日为奥密克戎毒株的起始点，在这一天
+的基础上减去之前相应数据，以保证模型能够正确使用。
+    \item 但由于相关数据的缺失，上海疫情数据缺少每日的治愈人数，于是为了补全缺失的数据，本文使用了双周期移动
+平均方法来补全了缺失的治愈数据。
+\end{itemize}
+
+
+\par 将上述初值与参数带入SIR模型，即可对上海市自3月1日起两个月内的疫情数据进行预测，预测结果如下：
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=.9\textwidth]{./SH_p.png}
+    \caption{上海感染人数预测图}
+    \label{fig1}
+\end{figure}
+
+\par 当看到绘图出来的结果时，我第一时间其实不太相信，因为预测出来的感染人数增长速率竟然比实际增长的速率要
+慢不少，经过分析后，我们发现这样的原因可能是有以下几点：
+\begin{itemize}
+    \item 虽然表面上上海疫情初期的确诊人数不多，但那是因为上海政府并没有将无症状感染者列入确诊名单，这也就导致
+数十倍与确诊人数的无症状感染者没有被考虑到，而无症状感染者的传染能力恰恰更高。
+    \item 上海疫情数据很有可能有拖报，瞒报的情况，导致病例数堆积严重，在积累到一定数量后导致数据有爆炸式提升。
+    \item 我们使用的是美国2022年1月1日之后一百天的疫情数据来进行参数拟合，但实际上美国的疫情已经。
+进入了很长一段时间的平稳期，导致有效再生数$R_t$值偏小，不适用于上海这种爆发初期的情况。
+    \item 美国每平方公里人口数为35，上海为32935，人口密度的巨大差距，使得奥密克戎毒株在上海传播更加迅速。
+    \item SIRDT、SIR模型还是较为简单，没有考虑到的因素太多，后续需要用更全面的模型来进行预测。
+\end{itemize}
+
+\par 由于本模型只是一个简单的模型，没有考虑到感染人数激增对死亡率的影响，但是在实际情况下，上海市的医疗系统肯定会因为过多的病例人数而瘫痪，这会导致患者的死亡率
+远远超过1.2$\%$,甚至造成社会的动荡。所以也可以得出结论：如果上海效仿美国的疫情防控措施，秉持以“群体免疫”、
+“与病毒共存”的理念，那么在5月14日，现有感染人数将会增加到39000余人。
+\par 反过来说，实验结果也说明了疫情爆发后上海市的精准防控策略确实取得了一定的成效，居家隔离等措施让原本飞速增长的感染人数有了明显的下降，将当前的感染人数控制在了4000左右，但也肯定存在
+许多的问题，导致感染人数下降的速度较为缓慢。
+
+\par 最后，将计算一下从3月1日至5月10日期间，上海疫情的有效再生数$R_t$的变化情况，以证明政府所采取的封控措施确实有效，
+结算结果如下图所示：
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=.9\textwidth]{./R_t.png}
+    \caption{上海疫情有效再生数变化图}
+    \label{fig1}
+\end{figure}
+
+\par 由上图可以看出，在大约2022年3月30日之前，$R_t$的值都趋近于1，说明当时的疫情感染人数与治愈人数较为平衡，是可控的，但是在4月1日开始，$R_t$值
+开始上升，并在4月19日时达到了最大值2.54，这一段的原因是因为上海开始了大规模核酸与排查，导致之前漏检、瞒报的病例全部暴露了出来，在4月29日左右，$R_t$值又突然
+有了断崖式的下跌，重新回到了1附近，使上海疫情形式恢复到了可控状态。
+
+
 \subsection{对问题二的求解}
 \subsubsection{再生数的估计}
 \subsection{对问题三的求解}
@@ -209,37 +433,6 @@ SEIR模型
 模型的缺点模型的缺点模型的缺点模型的缺点模型的缺点模型的缺点模型的缺点模型的缺点模型的缺点模型的缺点模型的缺点模型的缺点模型的缺点模型的缺点。
 
 
-
-\section{写作参考格式}
-写作过程中可能要用到一些格式参考，正式写作的时候，可以直接将这一章删掉即可。
-
-\textbf{无序列表格式}
-\begin{itemize}
-\item 无序列表1
-\item 无序列表2
-\item 无序列表3
-\item 无序列表4
-\end{itemize}
-
-
-\textbf{表格格式}
-
-\begin{tabular}{cc}
- \hline
- \makebox[0.4\textwidth][c]{符号}	&  \makebox[0.5\textwidth][c]{意义} \\ \hline
- D	    & 宽度（cm） \\ \hline
- L	    & 长度（cm）  \\ \hline
-\end{tabular}
-
-
-%
-%\textbf{图片格式}
-%\begin{figure}[h]
-%\centering
-%\includegraphics[width=5cm]{xxx.jpg}
-%\caption{图片标题}
-%\end{figure}
-
 \section{参考文献}
 %参考文献
 \begin{thebibliography}{1.2}%宽度9
@@ -251,6 +444,9 @@ SEIR模型
   \bibitem{bib:two}
  韩中庚. 数学建模方法及其应用[M]. 高等教育出版社, 2005.
 \end{thebibliography}
+
+\bibliographystyle{plain}
+\bibliography{ref}
 
 \newpage
 %附录
